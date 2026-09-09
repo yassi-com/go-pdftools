@@ -1,19 +1,19 @@
 package pdftk
 
-type Option func(cmd command)
+// Option adjusts an invocation before it runs.
+type Option func(cmd *command)
 
-// Set executable name instead of using default "pdftk"
+// OptionExecutable invokes name instead of the default "pdftk" — "pdftk-java",
+// for instance, or an absolute path.
 func OptionExecutable(name string) Option {
-	return func(cmd command) {
-		// replace the command entirely
-		c := createCmd(name, cmd.Stdout, cmd.Stdin, cmd.Args...)
-		cmd.Cmd = c.Cmd
+	return func(cmd *command) {
+		cmd.executable = name
 	}
 }
 
-// Flatten the PDF before output
+// OptionFlatten flattens the PDF before output.
 func OptionFlatten() Option {
-	return func(cmd command) {
-		cmd.Args = append(cmd.Args, "flatten")
+	return func(cmd *command) {
+		cmd.args = append(cmd.args, "flatten")
 	}
 }

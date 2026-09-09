@@ -2,20 +2,26 @@ package pdftk_test
 
 import (
 	"bytes"
-	"github.com/yassi-com/go-pdftools/fdf"
-	"github.com/yassi-com/go-pdftools/pdftk"
+	"context"
+	"errors"
 	"log"
 	"os"
+	"strings"
+
+	"github.com/yassi-com/go-pdftools/fdf"
+	"github.com/yassi-com/go-pdftools/pdftk"
 )
 
 func ExampleCat() {
+	ctx := context.Background()
+
 	// file to write output into
 	f, err := os.Create("out.pdf")
 	if err != nil {
 		// handle error
 	}
 
-	err = pdftk.Cat(f, pdftk.NewInputFileMap("first.pdf", "second.pdf", "third.pdf"), []pdftk.PageRange{
+	err = pdftk.Cat(ctx, f, pdftk.NewInputFileMap("first.pdf", "second.pdf", "third.pdf"), []pdftk.PageRange{
 		{
 			FileHandleName: pdftk.InputHandleNameFromInt(1),
 			Rotation:       pdftk.East,
@@ -29,7 +35,25 @@ func ExampleCat() {
 	}
 }
 
+func ExampleCat_all() {
+	ctx := context.Background()
+
+	// file to write output into
+	f, err := os.Create("out.pdf")
+	if err != nil {
+		// handle error
+	}
+
+	// omitting page ranges concatenates every input in file handle order
+	err = pdftk.Cat(ctx, f, pdftk.NewInputFileMap("first.pdf", "second.pdf"), nil)
+	if err != nil {
+		// handle error
+	}
+}
+
 func ExampleCat_pageRanges() {
+	ctx := context.Background()
+
 	// file to write output into
 	f, err := os.Create("out.pdf")
 	if err != nil {
@@ -68,13 +92,15 @@ func ExampleCat_pageRanges() {
 		},
 	}
 
-	err = pdftk.Cat(f, inputFiles, pageRanges)
+	err = pdftk.Cat(ctx, f, inputFiles, pageRanges)
 	if err != nil {
 		// handle error
 	}
 }
 
 func ExampleFillForm() {
+	ctx := context.Background()
+
 	var b bytes.Buffer
 	if err := fdf.Write(&b, fdf.Inputs{
 		"first field":  "hello",
@@ -90,13 +116,15 @@ func ExampleFillForm() {
 	defer f.Close()
 
 	// fill form with FDF data from buffer b and flatten
-	err = pdftk.FillForm(f, "test.pdf", &b, pdftk.OptionFlatten())
+	err = pdftk.FillForm(ctx, f, "test.pdf", &b, pdftk.OptionFlatten())
 	if err != nil {
 		// handle error
 	}
 }
 
 func ExampleFillForm_file() {
+	ctx := context.Background()
+
 	fdfFile, err := os.Open("input.fdf")
 	if err != nil {
 		// handle error
@@ -110,13 +138,15 @@ func ExampleFillForm_file() {
 	defer outFile.Close()
 
 	// fill form with FDF data from FDF file and flatten
-	err = pdftk.FillForm(outFile, "test.pdf", fdfFile, pdftk.OptionFlatten())
+	err = pdftk.FillForm(ctx, outFile, "test.pdf", fdfFile, pdftk.OptionFlatten())
 	if err != nil {
 		// handle error
 	}
 }
 
 func ExampleBackground() {
+	ctx := context.Background()
+
 	backgroundFile, err := os.Open("background.pdf")
 	if err != nil {
 		// handle error
@@ -130,13 +160,15 @@ func ExampleBackground() {
 	defer outFile.Close()
 
 	// add backgroundFile to background of input.pdf
-	err = pdftk.Background(outFile, "input.pdf", backgroundFile)
+	err = pdftk.Background(ctx, outFile, "input.pdf", backgroundFile)
 	if err != nil {
 		// handle error
 	}
 }
 
 func ExampleStamp() {
+	ctx := context.Background()
+
 	stampFile, err := os.Open("stamp.pdf")
 	if err != nil {
 		// handle error
@@ -150,8 +182,23 @@ func ExampleStamp() {
 	defer outFile.Close()
 
 	// stamp input.pdf with stampFile
-	err = pdftk.Stamp(outFile, "input.pdf", stampFile)
+	err = pdftk.Stamp(ctx, outFile, "input.pdf", stampFile)
 	if err != nil {
 		// handle error
+	}
+}
+
+func ExampleError() {
+	ctx := context.Background()
+
+	var out bytes.Buffer
+	err := pdftk.Cat(ctx, &out, pdftk.NewInputFileMap("encrypted.pdf"), nil)
+
+	var toolErr *pdftk.Error
+	if errors.As(err, &toolErr) {
+		// classify the failure from what pdftk reported
+		if strings.Contains(strings.ToLower(toolErr.Stderr), "owner password") {
+			log.Print("input is password protected")
+		}
 	}
 }

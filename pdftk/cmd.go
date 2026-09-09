@@ -40,6 +40,10 @@ func newCommand(stdout io.Writer, stdin io.Reader, options []Option, args ...str
 
 // run executes the command, returning an *Error on failure.
 func (c *command) run(ctx context.Context) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	var stderr bytes.Buffer
 
 	cmd := exec.CommandContext(ctx, c.executable, c.args...)

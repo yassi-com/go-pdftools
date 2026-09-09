@@ -7,13 +7,15 @@ type Inputs map[string]interface{}
 // OptionInput indicates the value is an option state.
 // Option states are used in dropdowns, checkboxes, and radio buttons.
 // For PDFtk dump_data_fields, use this for a FieldStateOption value:
+//
 //	# pdftk test.pdf dump_data_fields
-// 	FieldType: Button
+//	FieldType: Button
 //	FieldName: checkbox1
 //	FieldStateOption: Yes
 //	FieldStateOption: Off
 //
 // E.g. it is common to have Yes and Off for checkboxes:
+//
 //	OptionInput("Yes") // checked
 //	OptionInput("Off") // unchecked
 type OptionInput string

@@ -12,7 +12,7 @@ func TestInputFileMap_parameterize(t *testing.T) {
 		want []string
 	}{
 		{
-			name:"simple parameters are handled",
+			name: "simple parameters are handled",
 			m: InputFileMap{
 				"A": "foo.txt",
 				"B": "bar.txt",
@@ -21,12 +21,12 @@ func TestInputFileMap_parameterize(t *testing.T) {
 			want: []string{"A=foo.txt", "B=bar.txt", "C=baz.txt"},
 		},
 		{
-			name:"parameters are sorted by length and then lexicographically",
+			name: "parameters are sorted by length and then lexicographically",
 			m: InputFileMap{
-				"A": "foo.txt",
+				"A":  "foo.txt",
 				"AA": "aba.txt",
-				"B": "bar.txt",
-				"C": "baz.txt",
+				"B":  "bar.txt",
+				"C":  "baz.txt",
 				"CC": "foobar.txt",
 			},
 			want: []string{"A=foo.txt", "B=bar.txt", "C=baz.txt", "AA=aba.txt", "CC=foobar.txt"},

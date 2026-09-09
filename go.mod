@@ -1,3 +1,3 @@
-module github.com/patiek/go-pdftools
+module github.com/yassi-com/go-pdftools
 
-go 1.14
+go 1.24
